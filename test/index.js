@@ -126,4 +126,14 @@ describe('cobbler', function() {
        });
     });
   });
+
+  it("throws if profile is null or undefined", function() {
+    assert.throws(function() {
+      cobbler('passport-github');
+    }, '`profile` must be an object or false');
+
+    assert.throws(function() {
+      cobbler('passport-github', null);
+    }, '`profile` must be an object or false');
+  });
 });

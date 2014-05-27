@@ -17,14 +17,13 @@ module.exports = cobbler;
  */
 
 function cobbler(strategy, profile, opts) {
-  opts = opts || {};
-  var passauth = true;
-
-  if (false === profile) {
-    passauth = false;
-  } else {
-    profile = profile || {};
+  if ('undefined' === typeof profile || null === profile) {
+    var msg = '`profile` must be an object or false';
+    throw new Error(msg);
   }
+
+  opts = opts || {};
+  var passauth = !!profile;
 
   // npm name is passed
   if ('string' === typeof strategy) {
