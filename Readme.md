@@ -76,6 +76,7 @@ It should be noted that you may need to clear the `require.cache` of your `app` 
   * More test coverage for other Passport OAuth Strategies (only Github at this point)
   * Ability to set arguments such as `accessToken, refreshToken, params`
   * Ability to test `fail` and `error` calls.
+  * Ability to set `callback url` `code` and `error` query params
 
 ## License
 
