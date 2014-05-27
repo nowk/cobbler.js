@@ -62,7 +62,7 @@ You can restore the old functions by calling `restore()`.
 
 ---
 
-It should be noted that `require` does cache so you may need to clear the `require.cache` of your `app` between tests.
+It should be noted that you may need to clear the `require.cache` of your `app` between tests.
 
 ## Notes
 
@@ -73,7 +73,7 @@ It should be noted that `require` does cache so you may need to clear the `requi
 
 ## TODO
 
-  * More test converage for other Passport OAuth Strategies (only Github at this point)
+  * More test coverage for other Passport OAuth Strategies (only Github at this point)
   * Ability to set arguments such as `accessToken, refreshToken, params`
   * Ability to test `fail` and `error` calls.
 
