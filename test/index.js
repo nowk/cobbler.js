@@ -85,6 +85,27 @@ describe('cobbler', function() {
     });
   });
 
+  it("can be passed the Strategy", function(done) {
+    var GithubStrategy = require('passport-github').Strategy;
+    var passport = cobbler(GithubStrategy, profile);
+
+    var server = app.listen(7331, function() {
+      new WalkingDead(url).zombify(zopts)
+        .when(function(browser, next) {
+          browser.clickLink('[rel="login-with-github"]', next);
+        })
+        .then(function(browser) {
+          assert.equal(browser.text("title"), "Welcome!");
+          assert.equal(browser.text("h1"), "Hello John Doe!");
+        })
+        .end(function() {
+          passport.restore();
+          server.close();
+          done();
+       });
+    });
+  });
+
   it("can be passed the prototype object of the strategy", function(done) {
     var passportGithub = require('passport-github');
     var passport = cobbler(passportGithub.Strategy.prototype, profile);
