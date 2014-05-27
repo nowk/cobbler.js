@@ -46,12 +46,12 @@ function cobbler(strategy, profile, opts) {
    * restore the original methods
    */
 
-  this.restore = (function(_proto, self) {
-    return function() {
-      _proto.userProfile = self.originalUserProfile;
-      _proto.authenticate = self.originalAuthenticate;
-    };
-  })(proto, this);
+  var self = this;
+
+  this.restore = function() {
+    proto.userProfile = self.originalUserProfile;
+    proto.authenticate = self.originalAuthenticate;
+  };
 
 
   return this; // return
