@@ -36,6 +36,7 @@ function cobbler(strategy, profile, opts) {
     strategy = strategy.Strategy;
   }
 
+  // we have gotten either the Strategy or the prototype
   var proto = ('userProfile' in strategy) ? strategy : strategy.prototype;
 
   // override methods
