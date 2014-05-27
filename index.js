@@ -9,7 +9,7 @@ module.exports = cobbler;
 /*
  * cobbler
  *
- * @param {Stategy|String|Constructor} strategy
+ * @param {Stategy|String|Constructor|Prototype} strategy
  * @param {Object} profile
  * @param {Object} opts
  * @constructor
