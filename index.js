@@ -36,11 +36,11 @@ function cobbler(strategy, profile, opts) {
     strategy = strategy.Strategy;
   }
 
-  var proto = strategy.prototype;
+  var proto = ('userProfile' in strategy) ? strategy : strategy.prototype;
 
   // override methods
-  strategy.prototype.userProfile = userProfile.call(this, proto, profile);
-  strategy.prototype.authenticate =  authenticate.call(this, proto, passauth, opts);
+  proto.userProfile = userProfile.call(this, proto, profile);
+  proto.authenticate =  authenticate.call(this, proto, passauth, opts);
 
   /*
    * restore the original methods
