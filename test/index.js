@@ -8,7 +8,6 @@ describe('cobbler', function() {
   this._timeout = 99999;
   var zopts = {debug: false, silent: false};
   var url = 'http://localhost:7331';
-
   var profile = {
     provider: 'github',
     id: 12345,
@@ -17,113 +16,75 @@ describe('cobbler', function() {
   };
 
   var app;
-
-  beforeEach(function(done) {
+  beforeEach(function() {
     delete require.cache[require.resolve('./app')];
     app = require('./app');
-    done();
   });
 
-  it("success w/ the supplied profile", function(done) {
-    var passport = cobbler('passport-github', profile);
-
-    var server = app.listen(7331, function() {
-      new WalkingDead(url).zombify(zopts)
-        .when(function(browser, next) {
-          browser.clickLink('[rel="login-with-github"]', next);
-        })
-        .then(function(browser) {
-          assert.equal(browser.text("title"), "Welcome!");
-          assert.equal(browser.text("h1"), "Hello John Doe!");
-        })
-        .end(function() {
-          passport.restore();
-          server.close();
-          done();
-       });
-    });
-  });
-
-  it("defines a custom callbackURL", function(done) {
-    var passport = cobbler('passport-github', profile, {
-      callbackURL: 'http://localhost:7331/auth/github/callback-2'
+  describe('strategies', function() {
+    var passport, server;
+    afterEach(function(done) {
+      passport.restore();
+      server.close(done);
     });
 
-    var server = app.listen(7331, function() {
-      new WalkingDead(url).zombify(zopts)
-        .when(function(browser, next) {
-          browser.clickLink('[rel="login-with-github"]', next);
-        })
-        .then(function(browser) {
-          assert.equal(browser.text("title"), "Welcome Other!");
-          assert.equal(browser.text("h1"), "Uh... John Doe!");
-        })
-        .end(function() {
-          passport.restore();
-          server.close();
-          done();
-       });
+    it("success w/ the supplied profile", function(done) {
+      passport = cobbler('passport-github', profile);
+      server = app.listen(7331, function() {
+        new WalkingDead(url).zombify(zopts)
+          .when(loginWithgithub)
+          .then(assertSuccessfullogin)
+          .end(done);
+      });
     });
-  });
 
-  it("access denied", function(done) {
-    var passport = cobbler("passport-github", false);
-
-    var server = app.listen(7331, function() {
-      new WalkingDead(url).zombify(zopts)
-        .when(function(browser, next) {
-          browser.clickLink('[rel="login-with-github"]', next);
-        })
-        .then(function(browser) {
-          assert.equal(browser.text("title"), "Bad!");
-        })
-        .end(function() {
-          passport.restore();
-          server.close();
-          done();
-       });
+    it("defines a custom callbackURL", function(done) {
+      passport = cobbler('passport-github', profile, {
+        callbackURL: 'http://localhost:7331/auth/github/callback-2'
+      });
+      server = app.listen(7331, function() {
+        new WalkingDead(url).zombify(zopts)
+          .when(loginWithgithub)
+          .then(function(browser) {
+            assert.equal(browser.text("title"), "Welcome Other!");
+            assert.equal(browser.text("h1"), "Uh... John Doe!");
+          })
+          .end(done);
+      });
     });
-  });
 
-  it("can be passed the Strategy", function(done) {
-    var GithubStrategy = require('passport-github').Strategy;
-    var passport = cobbler(GithubStrategy, profile);
-
-    var server = app.listen(7331, function() {
-      new WalkingDead(url).zombify(zopts)
-        .when(function(browser, next) {
-          browser.clickLink('[rel="login-with-github"]', next);
-        })
-        .then(function(browser) {
-          assert.equal(browser.text("title"), "Welcome!");
-          assert.equal(browser.text("h1"), "Hello John Doe!");
-        })
-        .end(function() {
-          passport.restore();
-          server.close();
-          done();
-       });
+    it("access denied", function(done) {
+      passport = cobbler("passport-github", false);
+      server = app.listen(7331, function() {
+        new WalkingDead(url).zombify(zopts)
+          .when(loginWithgithub)
+          .then(function(browser) {
+            assert.equal(browser.text("title"), "Bad!");
+          })
+          .end(done);
+      });
     });
-  });
 
-  it("can be passed the prototype object of the strategy", function(done) {
-    var passportGithub = require('passport-github');
-    var passport = cobbler(passportGithub.Strategy.prototype, profile);
+    it("can be passed the Strategy", function(done) {
+      var strategy = require('passport-github').Strategy;
+      passport = cobbler(strategy, profile);
+      server = app.listen(7331, function() {
+        new WalkingDead(url).zombify(zopts)
+          .when(loginWithgithub)
+          .then(assertSuccessfullogin)
+          .end(done);
+      });
+    });
 
-    var server = app.listen(7331, function() {
-      new WalkingDead(url).zombify(zopts)
-        .when(function(browser, next) {
-          browser.clickLink('[rel="login-with-github"]', next);
-        })
-        .then(function(browser) {
-          assert.equal(browser.text("title"), "Welcome!");
-          assert.equal(browser.text("h1"), "Hello John Doe!");
-        })
-        .end(function() {
-          passport.restore();
-          server.close();
-          done();
-       });
+    it("can be passed the prototype object of the strategy", function(done) {
+      var proto = require('passport-github').Strategy.prototype;
+      passport = cobbler(proto, profile);
+      server = app.listen(7331, function() {
+        new WalkingDead(url).zombify(zopts)
+          .when(loginWithgithub)
+          .then(assertSuccessfullogin)
+          .end(done);
+      });
     });
   });
 
@@ -137,3 +98,21 @@ describe('cobbler', function() {
     }, '`profile` must be an object or false');
   });
 });
+
+/*
+ * click github login
+ */
+
+function loginWithgithub(browser, next) {
+  browser.clickLink('[rel="login-with-github"]', next);
+}
+
+/*
+ * assert successful login
+ */
+
+function assertSuccessfullogin(browser) {
+  assert.equal(browser.text("title"), "Welcome!");
+  assert.equal(browser.text("h1"), "Hello John Doe!");
+}
+
