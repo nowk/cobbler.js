@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/nowk/cobbler.js.svg?branch=master)](https://travis-ci.org/nowk/cobbler.js)
 [![Code Climate](https://codeclimate.com/github/nowk/cobbler.js.png)](https://codeclimate.com/github/nowk/cobbler.js)
+[![David DM](https://david-dm.org/nowk/cobbler.js.png)](https://david-dm.org/nowk/cobbler.js)
 
 > A spy who creates false passports, visas, diplomas and other documents
 
