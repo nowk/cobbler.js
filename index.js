@@ -35,6 +35,13 @@ function cobbler(strategy, profile, opts) {
   return this;
 }
 
+/*
+ * backup original methods
+ *
+ * @param {Prototype} proto
+ * @api private
+ */
+
 function backup(proto) {
   cobbler.__.userProfile = proto.userProfile;
   cobbler.__.authenticate = proto.authenticate;
