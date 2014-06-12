@@ -87,8 +87,7 @@ function override(proto) {
 function proto(strategy) {
   if ('string' === typeof strategy) {      // npm name
     strategy = require(strategy).Strategy;
-  }
-  if ('Strategy' in strategy) {     // exports
+  } else if ('Strategy' in strategy) {     // exports
     strategy = strategy.Strategy;
   }
 
