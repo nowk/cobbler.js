@@ -6,55 +6,100 @@
 
 module.exports = cobbler;
 
+// backup originals
+cobbler.__ = {};
+
 /*
  * cobbler
  *
  * @param {Stategy|String|Constructor|Prototype} strategy
  * @param {Object} profile
  * @param {Object} opts
- * @constructor
  * @api public
  */
 
 function cobbler(strategy, profile, opts) {
   if ('undefined' === typeof profile || null === profile) {
-    var msg = '`profile` must be an object or false';
-    throw new Error(msg);
+    throw new Error('`profile` must be an object or false');
   }
 
   opts = opts || {};
   var passauth = !!profile;
+  var _proto = proto(strategy);
+  backup(_proto);
+  override(_proto)
+    .method('userProfile', userProfile(profile))
+    .method('authenticate', authenticate(passauth, opts));
 
-  // npm name is passed
-  if ('string' === typeof strategy) {
+  this.restore = restore.bind(this, _proto);
+  return this;
+}
+
+function backup(proto) {
+  cobbler.__.userProfile = proto.userProfile;
+  cobbler.__.authenticate = proto.authenticate;
+}
+
+/*
+ * assign method
+ *
+ * @param {Prototype} proto
+ * @param {String} name
+ * @param {Function} fn
+ * @return {this}
+ * @api private
+ */
+
+function method(proto, name, fn) {
+  proto[name] = fn;
+  this.method = method.bind(this, proto);
+  return this;
+}
+
+/*
+ * override proto
+ *
+ * @param {Prototype}
+ * @return {this}
+ * @api private
+ */
+
+function override(proto) {
+  this.method = method.bind(this, proto);
+  return this;
+}
+
+/*
+ * return the prototype
+ *
+ * @param {String|Strategy|Prototype} strategy
+ * @return {Prototype}
+ * @api private
+ */
+
+function proto(strategy) {
+  if ('string' === typeof strategy) {      // npm name
     strategy = require(strategy).Strategy;
   }
-
-  // the exports.<StrategyName> is passed
-  if ('Strategy' in strategy) {
+  if ('Strategy' in strategy) {     // exports
     strategy = strategy.Strategy;
   }
 
-  // we have gotten either the Strategy or the prototype
-  var proto = ('userProfile' in strategy) ? strategy : strategy.prototype;
+  // is prototype or get the prototype
+  return ('userProfile' in strategy) ? strategy : strategy.prototype;
+}
 
-  // override methods
-  proto.userProfile = userProfile.call(this, proto, profile);
-  proto.authenticate =  authenticate.call(this, proto, passauth, opts);
+/*
+ * restore the original methods
+ *
+ * @param {Prototype} proto
+ * @api private
+ */
 
-  /*
-   * restore the original methods
-   */
-
-  var self = this;
-
-  this.restore = function() {
-    proto.userProfile = self.originalUserProfile;
-    proto.authenticate = self.originalAuthenticate;
-  };
-
-
-  return this; // return
+function restore(proto) {
+  proto.userProfile = cobbler.__.userProfile;
+  proto.authenticate = cobbler.__.authenticate;
+  cobbler.__ = {};
 }
 
 /*
@@ -64,17 +109,13 @@ function cobbler(strategy, profile, opts) {
  * We call the original method to allow it to go through the normal process
  * while mocking the OAuth2 object `this._oauth2`
  *
- * @param {Prototype} _proto
  * @param {Boolean} passauth
  * @param {Object} opts
  * @return {Function}
  * @api private
  */
 
-function authenticate(_proto, passauth, opts) {
-  var self = this;
-  var origfn = self.originalAuthenticate = _proto.authenticate;
-
+function authenticate(passauth, opts) {
   /*
    * mock oauth2 object
    *
@@ -97,6 +138,7 @@ function authenticate(_proto, passauth, opts) {
       callback(); // TODO arity and ability to define values for aguments
     }
   };
+  var _orig = cobbler.__.authenticate;
 
   return function(req, options) {
     options.callbackURL = opts.callbackURL || options.callbackURL;
@@ -112,7 +154,7 @@ function authenticate(_proto, passauth, opts) {
 
     // TODO do we need to back this up? This is instance based
     this._oauth2 = mockoauth2; // mock the oauth2 object
-    origfn.call(this, req, options);
+    _orig.call(this, req, options);
   };
 }
 
@@ -122,15 +164,12 @@ function authenticate(_proto, passauth, opts) {
  * Unlike the `authenticate` function, this is normally defined in
  * each inheritted strategy. This is other netowkr call out to the internet.
  *
- * @param {Prototype} _proto
  * @param {Object} profile
  * @return {Function}
  * @api private
  */
 
-function userProfile(_proto, profile) {
-  var origfn = this.originalUserProfile = _proto.userProfile;
-
+function userProfile(profile) {
   return function(accessToken, done) {
     done(null, profile);
   };
