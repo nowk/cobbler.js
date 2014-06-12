@@ -26,7 +26,6 @@ function cobbler(strategy, profile, opts) {
   opts = opts || {};
   var passauth = !!profile;
   var _proto = proto(strategy);
-  backup(_proto);
   override(_proto)
     .method('userProfile', userProfile(profile))
     .method('authenticate', authenticate(passauth, opts));
@@ -39,41 +38,40 @@ function cobbler(strategy, profile, opts) {
  * backup original methods
  *
  * @param {Prototype} proto
+ * @return {Object}
  * @api private
  */
 
 function backup(proto) {
-  cobbler.__.userProfile = proto.userProfile;
-  cobbler.__.authenticate = proto.authenticate;
+  var method = function(name) {
+    cobbler.__[name] = proto[name];
+    return this;
+  };
+
+  return {
+    method: method
+  };
 }
 
 /*
- * assign method
- *
- * @param {Prototype} proto
- * @param {String} name
- * @param {Function} fn
- * @return {this}
- * @api private
- */
-
-function method(proto, name, fn) {
-  proto[name] = fn;
-  this.method = method.bind(this, proto);
-  return this;
-}
-
-/*
- * override proto
+ * override method
  *
  * @param {Prototype}
- * @return {this}
+ * @return {Object}
  * @api private
  */
 
 function override(proto) {
-  this.method = method.bind(this, proto);
-  return this;
+  var method = function(name, fn) {
+    backup(proto).method(name);
+
+    proto[name] = fn;
+    return this;
+  };
+
+  return {
+    method: method
+  };
 }
 
 /*
@@ -103,9 +101,14 @@ function proto(strategy) {
  */
 
 function restore(proto) {
-  proto.userProfile = cobbler.__.userProfile;
-  proto.authenticate = cobbler.__.authenticate;
-  cobbler.__ = {};
+  var methods = Object.keys(cobbler.__);
+  var i = 0;
+  var len = methods.length;
+  for(; i<len; i++) {
+    var name = methods[i];
+    proto[name] = cobbler.__[name];
+    delete cobbler.__[name];
+  }
 }
 
 /*
@@ -144,7 +147,6 @@ function authenticate(passauth, opts) {
       callback(); // TODO arity and ability to define values for aguments
     }
   };
-  var _orig = cobbler.__.authenticate;
 
   return function(req, options) {
     options.callbackURL = opts.callbackURL || options.callbackURL;
@@ -160,7 +162,7 @@ function authenticate(passauth, opts) {
 
     // TODO do we need to back this up? This is instance based
     this._oauth2 = mockoauth2; // mock the oauth2 object
-    _orig.call(this, req, options);
+    cobbler.__.authenticate.call(this, req, options);
   };
 }
 
