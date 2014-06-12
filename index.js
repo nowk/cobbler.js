@@ -141,7 +141,7 @@ function authenticate(passauth, opts) {
 
   var mockoauth2 = {
     getAuthorizeUrl: function(params) {
-      return params.redirect_uri+queryp(passauth, opts);
+      return params.redirect_uri+queryp(passauth);
     },
     getOAuthAccessToken: function(code, params, callback) {
       callback(); // TODO arity and ability to define values for aguments
@@ -187,12 +187,11 @@ function userProfile(profile) {
  * add callback url query params
  *
  * @param {Boolean} passauth
- * @param {Object} opts
  * @return {String}
  * @api private
  */
 
-function queryp(passauth, opts) {
+function queryp(passauth) {
   return passauth ? '?code=12345' : '?error=access_denied';
 }
 
