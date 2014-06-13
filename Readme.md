@@ -84,9 +84,11 @@ You can restore the old functions by calling `restore()`.
 
     passport.restore();
 
----
+## API
 
-`cobbler` can be passed either the npm name eg. '*passport-github*' or the exports eg. `var passportGithub = require('passport-github');` or the strategy eg. `var GithubStrategy = require('passport-github').Strategy;`
+`cobbler`, *for stratgies*, can be passed either the npm name eg. '*passport-github*' or the exports eg. `var passportGithub = require('passport-github');` or the strategy eg. `var GithubStrategy = require('passport-github').Strategy;`
+
+*For sessions*, the first argument must be "session".
 
 ---
 
