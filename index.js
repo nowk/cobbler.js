@@ -162,7 +162,7 @@ function authenticate(passauth, opts) {
 
     // TODO do we need to back this up? This is instance based
     this._oauth2 = mockoauth2; // mock the oauth2 object
-    cobbler.__.authenticate.call(this, req, options);
+    cobbler.__.authenticate.call(this, req, options); // go about as original
   };
 }
 
