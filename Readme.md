@@ -14,6 +14,8 @@
 
 ## Usage
 
+#### Stratgies
+
     var passport = cobbler('passport-github', {..profile..});
 
     var server = app.listen(7331, function() {
@@ -47,7 +49,32 @@ To simulate a failed authentication, the "profile" argument should be `false`.
 
     var passport = cobbler('passport-github', false);
 
+
+#### Login Session
+
+`cobbler` provides a way to "login as a user" without actually going through the actual login (above).
+
+    var passport = cobbler('session', '12345');
+
+Note the first agrument string *'session'* (**case-sensitive**). The 2nd argument should be the object that is passed to the `passport.deserializeUser` method. ex.
+
+    passport.deserializeUser(function(id, done) {
+      User.findOne({_id: id})
+        .exec(function(err, resource) {
+          if (err) {
+            return done(err, null);
+          }
+          done(null, resource);
+        });
+    });
+
+`id` would be a `user.id`.
+
 ---
+
+*Your `passport.deserializeUser` will actually be invoked*
+
+#### Restoring
 
 You can restore the old functions by calling `restore()`.
 

@@ -26,9 +26,23 @@ function cobbler(strategy, profile, opts) {
   opts = opts || {};
   var passauth = !!profile;
   var _proto = proto(strategy);
-  override(_proto)
-    .method('userProfile', userProfile(profile))
-    .method('authenticate', authenticate(passauth, opts));
+  var ovr = override(_proto);
+
+  if ('session' === strategy) {
+    ovr
+      .method('authenticate', (function(user) {
+        return function(req, options) {
+          // user should be the object that is sent to passport.deserializeUser method
+          // ex: May be a user.id for a user lookup, or can be the entire user object itself
+          req._passport.session.user = user;
+          cobbler.__.authenticate.call(this, req, options); // go about as original
+        };
+      })(profile));
+  } else {
+    ovr
+      .method('userProfile', userProfile(profile))
+      .method('authenticate', authenticate(passauth, opts));
+  }
 
   this.restore = restore.bind(this, _proto);
   return this;
@@ -63,6 +77,10 @@ function backup(proto) {
 
 function override(proto) {
   var method = function(name, fn) {
+    if (!(name in proto)) {
+      throw new Error('No method `'+name+'` to override');
+    }
+
     backup(proto).method(name);
 
     proto[name] = fn;
@@ -83,6 +101,12 @@ function override(proto) {
  */
 
 function proto(strategy) {
+  // Session
+  if ('session' === strategy) {
+    return require('passport').strategies.SessionStrategy.prototype;
+  }
+
+  // Strategy
   if ('string' === typeof strategy) {      // npm name
     strategy = require(strategy).Strategy;
   } else if ('Strategy' in strategy) {     // exports

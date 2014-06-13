@@ -88,6 +88,28 @@ describe('cobbler', function() {
     });
   });
 
+  describe('sessions', function() {
+    var session, server;
+    afterEach(function(done) {
+      session.restore();
+      server.close(done);
+    });
+
+    it("logs you in as", function(done) {
+      var deserializeUser = {
+        id: profile.id,
+        name: profile.displayName
+      };
+
+      session = cobbler('session', deserializeUser);
+      server = app.listen(7331, function() {
+        new WalkingDead(url).zombify(zopts)
+          .then(assertSuccessfullogin)
+          .end(done);
+      });
+    });
+  });
+
   it("throws if profile is null or undefined", function() {
     assert.throws(function() {
       cobbler('passport-github');
