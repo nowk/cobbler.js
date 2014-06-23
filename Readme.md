@@ -103,14 +103,7 @@ It should be noted that you may need to clear the `require.cache` of your `app` 
 
 ## TODO
 
-  * More test coverage for other Passport OAuth Strategies
-
-    Currently tested stategies:
-
-      * Github
-      * Google
-      * Linkedin
-
+  * More test coverage for other Passport Strategies, especially non-OAuth strategies.
   * Ability to set arguments such as `accessToken, refreshToken, params`
   * Ability to test `fail` and `error` calls.
   * Ability to set `callback url` `code` and `error` query params
