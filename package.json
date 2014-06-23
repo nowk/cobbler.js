@@ -17,6 +17,9 @@
     "tests"
   ],
   "author": "Yung Hwa Kwon",
+  "contributors": [
+    "Jeremy Buis <buis.jeremy@gmail.com> (https://github.com/jeremybuis)"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/nowk/cobbler.js/issues"

@@ -108,6 +108,10 @@ It should be noted that you may need to clear the `require.cache` of your `app` 
   * Ability to test `fail` and `error` calls.
   * Ability to set `callback url` `code` and `error` query params
 
+## Contributors. Many Thanks!
+
+* Jeremy Buis [@jeremybuis](https://github.com/jeremybuis)
+
 ## License
 
 MIT
