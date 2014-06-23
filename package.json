@@ -1,6 +1,6 @@
 {
   "name": "cobbler",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Passport mock for integration tests",
   "main": "index.js",
   "scripts": {
