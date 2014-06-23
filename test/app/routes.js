@@ -22,9 +22,11 @@ module.exports = function() {
 
   app.get("/login", function(req, res, next) {
     var html = "<html>" +
-    "<head><title>Login</title></head>" +
-    "<body><a href=\"/auth/github\" rel=\"login-with-github\">Login with github</a></body>" +
-    "</html>";
+    "<head><title>Login</title></head><body>" +
+    "<a href=\"/auth/github\" rel=\"login-with-github\">Login with github</a>" +
+    "<a href=\"/auth/linkedin\" rel=\"login-with-linkedin\">Login with linkedin</a>" +
+    "<a href=\"/auth/google\" rel=\"login-with-google\">Login with google</a>" + 
+    "</body></html>";
     res.send(html);
   });
 
@@ -57,6 +59,30 @@ module.exports = function() {
       "<body><h1>Uh... "+user.name+"!</h1></body>" +
       "</html>";
       res.send(html);
+    });
+
+  app.get("/auth/linkedin",
+    passport.authenticate('linkedin', {state: 'SOME STATE'}),
+    function(req, res, next) {
+      //
+    });
+
+  app.get("/auth/linkedin/callback",
+    passport.authenticate("linkedin", {failureRedirect: "/auth/failure"}),
+    function(req, res, next) {
+      res.redirect("/");
+    });
+
+  app.get("/auth/google",
+    passport.authenticate('google', {scope: 'profile email'}),
+    function(req, res, next) {
+      //
+    });
+
+  app.get("/auth/google/callback",
+    passport.authenticate("google", {failureRedirect: "/auth/failure"}),
+    function(req, res, next) {
+      res.redirect("/");
     });
 };
 

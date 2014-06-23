@@ -14,6 +14,19 @@ describe('cobbler', function() {
     displayName: 'John Doe',
     emails: [{value: 'john@doe.com'}]
   };
+  var linkedinProfile = {
+    provider: 'linkedin',
+    id: 54321,
+    displayName: 'John Doe',
+    emailAddress: 'john@doe.com'
+  };
+
+  var googleProfile = {
+    provider: 'google',
+    id: 'abcdef',
+    displayName: 'John Doe',
+    email: 'john@doe.com'
+  };
 
   var app;
   beforeEach(function() {
@@ -28,11 +41,21 @@ describe('cobbler', function() {
       server.close(done);
     });
 
-    it("success w/ the supplied profile", function(done) {
+    it("success w/ the supplied profile and github strategy", function(done) {
       passport = cobbler('passport-github', profile);
       server = app.listen(7331, function() {
         new WalkingDead(url).zombify(zopts)
           .when(loginWithgithub)
+          .then(assertSuccessfullogin)
+          .end(done);
+      });
+    });
+
+    it("success w/ the supplied profile and linkedin strategy", function(done) {
+      passport = cobbler('passport-linkedin-oauth2', linkedinProfile);
+      server = app.listen(7331, function() {
+        new WalkingDead(url).zombify(zopts)
+          .when(loginWithLinkedin)
           .then(assertSuccessfullogin)
           .end(done);
       });
@@ -65,12 +88,23 @@ describe('cobbler', function() {
       });
     });
 
-    it("can be passed the Strategy", function(done) {
+    it("can be passed the Github Strategy", function(done) {
       var strategy = require('passport-github').Strategy;
       passport = cobbler(strategy, profile);
       server = app.listen(7331, function() {
         new WalkingDead(url).zombify(zopts)
           .when(loginWithgithub)
+          .then(assertSuccessfullogin)
+          .end(done);
+      });
+    });
+
+    it("can be passed the Google Strategy", function(done) {
+      var strategy = require('passport-google-oauth').OAuth2Strategy;
+      passport = cobbler(strategy, profile);
+      server = app.listen(7331, function() {
+        new WalkingDead(url).zombify(zopts)
+          .when(loginWithGoogle)
           .then(assertSuccessfullogin)
           .end(done);
       });
@@ -127,6 +161,22 @@ describe('cobbler', function() {
 
 function loginWithgithub(browser, next) {
   browser.clickLink('[rel="login-with-github"]', next);
+}
+
+/*
+ * click linkedin login
+ */
+
+function loginWithLinkedin(browser, next) {
+  browser.clickLink('[rel="login-with-linkedin"]', next);
+}
+
+/*
+ * click google login
+ */
+
+function loginWithGoogle(browser, next) {
+  browser.clickLink('[rel="login-with-google"]', next);
 }
 
 /*
